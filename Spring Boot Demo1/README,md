@@ -1,0 +1,401 @@
+
+#### Spring Boot学习笔记：（一）简介与HelloWorld搭建：可查看：http://blog.csdn.net/noaman_wgs/article/details/78882641
+#### Spring Boot学习笔记：（二）常规属性配置：可查看：http://blog.csdn.net/noaman_wgs/article/details/78897345
+
+
+---
+
+
+## Spring Boot学习笔记：（一）简介与HelloWorld搭建
+### 一、什么是Spring Boot
+在使用Spring开发的时候，有很多缺点：
+* 配置繁多
+* 开发效率低下
+* 部署流程复杂
+* 第三方技术集成难度大
+
+而Spring Boot使用“习惯优于配置”的理念，可以快速搭建项目，简化Spring配置。本质上来说，Spring Boot就是Spring，使用Spring Boot可以很快创建一个独立运行（运行jar，内嵌Servlet容器）、准生产级别的基于Spring框架的项目，而又不需要或者很少的Spring配置。
+
+
+**Spring Boot优点：**
+* 快速构建项目；
+* 对主流框架的无配置集成；
+* 项目可独立运行，无须外部依赖Servlet容器；
+* 提供运行时的应用监控；
+* 极大提高开发、部署效率；
+* 与云计算天然集成。
+
+### 二、Spring Boot的HelloWorld搭建
+#### 方式一：通过http://start.spring.io/
+
+（1）浏览器中输入http://start.spring.io/，然后再填写项目信息，以及选择所需要的依赖（本Demo只选择了Web所需要的依赖）。如图：
+![Alt text](./1514033625292.png)
+
+
+（2）点击Generate Project，即可下载代码。下载下来的代码是一个简单基于MAVEN的项目，可将代码导入到开发工具中。
+![Alt text](./1514034326487.png)
+可以看到Web所需要的依赖自动下载下来。
+
+
+
+#### 方式二：通过Intellij IDEA新建Spring Initializr项目
+可通过Intellij IDEA新建Spring Initializr项目。
+（1）填写项目信息。
+![Alt text](./1514034453363.png)
+
+（2）选择MAVEN构建项目，打包使用Jar：
+![Alt text](./1514034525084.png)
+
+（3）选择使用的技术：
+![Alt text](./1514034564977.png)
+
+
+（4）项目结构及依赖树：
+![Alt text](./1514034797066.png)
+
+上图中：
+* pom.xml：Maven构建说明文件；
+* SpringbootdemoApplication.java：很关键的启动类，程序入口在此，这个类是自动生成的，以artifactId+Application规则命名；
+* SpringbootdemoApplication.java：一个空的Junit测试类，它加载了一个使用Spring Boot字典配置功能的Spring应用程序上下文；
+* application.properties：全局配置文件，可以对一些默认配置的配置值进行修改，如可以修改Tomcat的默认端口号。
+
+#### pom.xml
+进入pom.xml看看Spring Boot的MAVEN配置有什么特殊的地方：
+**（1）Spring Boot父级依赖**
+```
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.9.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+```
+这块配置就是Spring Boot父级依赖，有了这个，当前的项目就是Spring Boot项目了.spring-boot-starter-parent是一个特殊的starter，它用来提供相关的Maven默认依赖，使用它之后，常用的包依赖可以省去version标签。关于Spring Boot提供了哪些jar包的依赖，可查看C:\Users\用户.m2\repository\org\springframework\boot\spring-boot-dependencies\1.5.1.RELEASE\spring-boot-dependencies-1.5.1.RELEASE.pom：
+
+![Alt text](./1514036204563.png)
+
+提供的依赖远远不止图中显示的这些，有兴趣可以自己查看。
+
+
+**（2）Starter POMs：ring-boot-starter-xx**
+starter依赖中封装了想要实现功能的依赖，相关的技术配置将会消除，可以得到Spring Boot提供的自动配置的Bean。
+如web:
+```
+<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+```
+Spring Boot官方提供的starter pom：
+![Alt text](./1514038145276.png)
+![Alt text](./1514038190970.png)
+以及第三方所写的starter pom：
+![Alt text](./1514038222458.png)
+
+
+（3）Spring Boot编译插件：可以将项目打包成一个可执行jar。
+```
+<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+```
+
+### 三、运行Hello World
+下面演示怎样运行基于Spring Boot的Hello World。
+直接在启动类编写代码，返回任意一句话：
+```
+package com.wgs.springbootdemo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+RestController
+@SpringBootApplication
+public class SpringbootdemoApplication {
+
+	@RequestMapping(value = "/")
+	public String index(){
+		return "Hello Spring Boot!";
+	}
+
+	public static void main(String[] args) {
+		SpringApplication.run(SpringbootdemoApplication.class, args);
+	}
+}
+
+```
+
+然后直接右键Run，启动项目
+![Alt text](./1514037067918.png)
+打开网页输入http://localhost:8080/即可以看见输出的结果：
+```
+Hello Spring Boot!
+```
+
+代码解释：
+* **@SpringBootApplication：**Spring Boot项目的核心注解，主要目的是开启自动注解；
+* **main方法：**标准的Java应用的main方法，主要作用是作为项目启动的入口；
+* **@RestController：**等价于@Controller+@ResponseBody的结合，使用这个注解的类里面的方法都以json格式输出。
+
+#### ^-^修改Banner：
+在每次启动项目的 时候，都会有一个默认的启动图案：
+![Alt text](./1514037618021.png)
+可以定制一个属于自己的启动图案。
+（1）在src/main/resources下新建一个banner.txt；
+（2）在网站http://patorjk.com/software/taag中输入自己想要的字符：
+![Alt text](./1514037707330.png)
+点select& copy，将生成的字符复制到banner.txt文件中；
+（3）重新启动项目，即可看到属于自己的启动图案：
+![Alt text](./1514037821015.png)
+
+
+## Spring Boot学习笔记：（二）常规属性配置
+
+### 一、依赖注入
+#### 1 @Value
+Spring Boot中，可使用@PropertySource指明属性文件所在的位置（默认为application.properties，不需要声明），通过@Value注入值。
+（1）application.properties：
+```
+person.name=wgs
+person.age=25
+```
+
+（2）入口类：
+```
+package com.wgs;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+RestController
+SpringBootApplication
+public class SpringbootdemoApplication {
+
+	@Value("${person.name}")
+	private String name;
+	@Value("${person.name}")
+	private String age;
+
+	@RequestMapping(value = "/test1")
+	public String test1(){
+		return "person's name is:" + name + ",person's age is:" + age;
+	}
+	@RequestMapping(value = "/")
+	public String index(){
+		return "Hello Spring Boot!";
+	}
+
+	public static void main(String[] args) {
+		SpringApplication.run(SpringbootdemoApplication.class, args);
+	}
+}
+
+```
+（3）运行，访问http://localhost:8080/test1，结果如下：
+```
+person's name is:wgs ,person's age is:25
+```
+
+#### 2 @Configuration和@PropertySource
+当然如果属性过多时，用@Value一个一个注入会显得很繁琐，可以使用@ConfigurationProperties将properties属性和一个Bean关联起来。
+注：在Spring Boot 1.5以上的版本，使用@Configuration和@PropertySource代替@ConfigurationProperties。下面来看看如何使用：
+（1）在resources下建config文件夹，再建一个author.properties：/config/author.properties
+```
+author.name=wgs
+author.age=25
+```
+
+（2）配置Bean：AuthorSettings.java：
+```
+package com.wgs.config;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
+
+/**
+ * @author GenshenWang.nomico
+ * @date 2017/12/24.
+ */
+@Component
+@PropertySource("classpath:config/author.properties")
+@ConfigurationProperties(prefix = "author")
+public class AuthorSettings {
+    private String name;
+    private int age;
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+```
+
+**@PropertySource**：指定properties文件的位置；
+**@ConfigurationProperties**：通过prefix属性关联properties文件中的配置；
+（注：在Spring Boot 1.5之前的版本可以使用
+`@ConfigurationProperties(prefix = "author", locations = "classpath:config/author.properties")`
+）
+
+（3）Controller类：AuthorController.java
+```
+package com.wgs.controller;
+
+import com.wgs.config.AuthorSettings;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * @author GenshenWang.nomico
+ * @date 2017/12/24.
+ */
+@RestController
+@EnableConfigurationProperties(AuthorSettings.class)
+public class AuthorController {
+
+    @Autowired
+    AuthorSettings authorSettings;
+
+    @RequestMapping("/authorinfo")
+    public String index(){
+        return "Author name is : " + authorSettings.getName() + " , age is : " + authorSettings.getAge();
+    }
+}
+
+```
+
+注：@EnableConfigurationProperties(AuthorSettings.class)：当@EnableConfigurationProperties注解应用到程序中时，任何被ConfigurationProperties注解的Bean将自动被Environment属性配置。
+
+（4）在main方法中启动后在浏览器中输入http://localhost:8080/authorinfo，即可看到输出信息：
+```
+Author name is : wgs , age is : 25
+```
+
+###  二、Profile设置
+Profile是Spring用来针对不同环境对不同的配置提供支持的。
+（1）首先创建全局Profile配置文件，可多个，命名规则为：
+`application-{profile}.properties`
+如：在项目中创建两个Profile配置文件，设置不同的端口号，分别为：
+![Alt text](./1514125050513.png)
+
+**application-dev.properties：**设置开发环境下端口号为8888
+```
+server.port=8888
+```
+
+**application-prod.properties：**设置开发环境下端口号为80
+```
+server.port=80
+```
+
+（2）在application.properties中通过设置
+`spring.profile.active={profile}`
+来指定所需要的Profile。
+
+如：
+在application.properties中
+指定生产环境下（profile = prod， port = 80）：
+```
+spring.profiles.active=prod
+```
+启动后：
+![Alt text](./1514124747174.png)
+
+指定开发环境下（profile = dev，port= 8888）：
+```
+spring.profiles.active=dev
+```
+启动后：
+![Alt text](./1514124819414.png)
+
+
+
+###  三、日志
+Spring Boot内部日志系统使用的是Commons Logging，支持Java Util Logging、Log4j、Log4j2、Logback作为日志框架。
+
+默认情况下使用Logback作为日志框架。
+
+#### 1 日志格式
+启动Spring Boot，可以Spring Boot默认的日志输出格式：
+![Alt text](./1514170545147.png)
+>（1） 日期和时间，精确到毫秒，易于排序；
+>（2）日志级别：ERROR, WARN, INFO, DEBUG, TRACE, FATAL；
+>（3）Process ID；
+>（4）分隔符：区分实际日志信息开头；
+>（5）线程名：包括在方括号中；
+>（6）日志名：通常是源class的类名（缩写）；
+>（7）日志信息。
+
+
+#### 2 配置日志级别
+配置格式：
+```
+logging.level.包名 = 级别（ERROR, WARN, INFO, DEBUG, TRACE，FATAL）
+```
+如：
+```
+logging.level.org.springframework.web = ERROR
+```
+
+#### 3 配置日志文件输出
+```
+logging.file = D:/mylog/log.log
+```
+日志文件每到10M就会被轮换，和控制台一样，默认记录ERROR，WARN，INFO等级别。
+
+
+### 四、Application属性文件
+Spring Boot Application将会从以下位置（优先级从高到低）加载application.properties 和 application.yml ：
+* 当前应用程序运行目录下的/config子目录里；
+* 当前应用程序运行目录；
+* classpath下的/config包；
+* classpath根路径
+
+即src/main/resources/config下application.properties覆盖src/main/resources下application.properties中相同的属性
+此外，如果你在相同优先级位置同时有application.properties和application.yml，那么application.properties里的属性里面的属性就会覆盖application.yml。
+
+**属性占位符**
+当application.properties里的值被使用时，会被存在的Environment过滤，可以引用先前定义的值：
+```
+customer.name = WGS
+customer.description=Merry Christmas to ${customer.name} !
+```
+
+最后，送给大家一颗圣诞树，Merry Christmas to U!
+<a href ="http://edagarli.b0.upaiyun.com/christmastree/">想见圣诞树戳我</a>
+
+
+
+---
+参考：
+《SpringBoot实战》
+http://tengj.top/2017/02/28/springboot2/
+
+
+
